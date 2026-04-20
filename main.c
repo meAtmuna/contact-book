@@ -102,8 +102,47 @@ int read_from_csv(contact contact_array[]) {
 
 
 int main() {
-    add_new_entry();
-    list_contacts();
+    char input[10];
+
+    while (1)
+    {
+        printf("\n--- Contact Book ---\n");
+        printf("[A] Add Contact\n");
+        printf("[L] List Contacts\n");
+        printf("[L] Help\n");
+        printf("[Q] Quit\n");
+        printf("Enter choice: ");
+
+        fgets(input, sizeof(input), stdin);
+
+        char choice = tolower(input[0]);
+
+        if (choice == 'a')
+        {
+            add_new_entry();
+        }
+        else if (choice == 'l')
+        {
+            list_contacts();
+        }
+        else if (choice == 'h')
+        {
+            printf("\nCommands:\n");
+            printf("A - Add contact\n");
+            printf("L - List contacts\n");
+            printf("H - Help\n");
+            printf("Q - Quit\n\n");
+        }
+        else if (choice == 'q')
+        {
+            printf("Goodbye!\n");
+            break;
+        }
+        else
+        {
+            printf("Unknown command!\n");
+        }
+    }
 
     return 0;
 }
