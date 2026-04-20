@@ -101,7 +101,13 @@ int read_from_csv(contact contact_array[]) {
 }
 
 
-int main() {
+int main(int argc, char *argv[]) {
+
+    if (argc > 1)
+    {
+        FILENAME = argv[1];
+    }
+    
     char input[10];
 
     while (1)
@@ -109,7 +115,7 @@ int main() {
         printf("\n--- Contact Book ---\n");
         printf("[A] Add Contact\n");
         printf("[L] List Contacts\n");
-        printf("[L] Help\n");
+        printf("[H] Help\n");
         printf("[Q] Quit\n");
         printf("Enter choice: ");
 
@@ -151,7 +157,12 @@ int add_new_entry() {
     FILE *fptr;
 
     fptr = fopen(FILENAME, "a");
-
+    if (fptr == NULL)
+    {
+        printf("Error opening file!\n");
+        return 1;
+    }
+    
     char name[INPUT_LENGTH];
     char address[INPUT_LENGTH];
     char email[INPUT_LENGTH];
