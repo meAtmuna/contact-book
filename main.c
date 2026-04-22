@@ -21,6 +21,7 @@ int read_from_csv(contact contact_array[]);
 void print_contact(const contact *contact);
 int add_new_entry();
 void wait_for_enter();
+void search_contacts();
 
 int list_contacts() {
     int contact_count = read_from_csv(contact_array);
@@ -80,6 +81,32 @@ void remove_quotes(char * str) {
     }
     
     str[j] = '\0';
+}
+
+void search_contacts() {
+    char query[INPUT_LENGTH];
+
+    printf("Enter name to search: ");
+    fgets(query, INPUT_LENGTH, stdin);
+
+    query[strcspn(query, "\n")] = 0;
+
+    int contact_count = read_from_csv(contact_array);
+    int found = 0;
+
+    for (int i = 0; i < contact_count; i++)
+    {
+        if (strstr(contact_array[i].name, query) != NULL)
+        {
+            print_contact(&contact_array[i]);
+            found = 1;
+        }
+    }
+    
+    if (!found)
+    {
+        printf("\nNo contact found!\n");
+    }
 }
 
 char* get_field(char *str, int *i){
@@ -193,6 +220,7 @@ int main(int argc, char *argv[]) {
         printf("\n--- Contact Book ---\n");
         printf("[A] Add Contact\n");
         printf("[L] List Contacts\n");
+        printf("[s] Search Contacts\n");
         printf("[H] Help\n");
         printf("[Q] Quit\n");
         printf("Enter choice: ");
@@ -209,6 +237,11 @@ int main(int argc, char *argv[]) {
         else if (choice == 'l')
         {
             list_contacts();
+            wait_for_enter();
+        }
+        else if (choice == 's')
+        {
+            search_contacts();
             wait_for_enter();
         }
         else if (choice == 'h')
