@@ -20,6 +20,7 @@ int list_contacts();
 int read_from_csv(contact contact_array[]);
 void print_contact(const contact *contact);
 int add_new_entry();
+void wait_for_enter();
 
 int list_contacts() {
     int contact_count = read_from_csv(contact_array);
@@ -38,6 +39,76 @@ void print_contact(const contact *contact) {
     printf("Email: %s\n", contact->email);
     printf("Number: %s\n", contact->number);
     printf("\n");
+}
+
+void clear_screen() {
+    #ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
+
+void wait_for_enter() {
+
+    printf("\nPress Enter to continue...");
+    while (getchar() != '\n');
+}
+
+void sanitize_input(char *str) {
+    for (int i = 0; str[i]; i++)
+    {
+        if (str[i] == ',')
+        {
+            str[i] = ';';
+        }
+    }
+    
+}
+
+void remove_quotes(char * str) {
+    int i = 0, j = 0;
+
+    while (str[i])
+    {
+        if (str[i] != '"')
+        {
+            str[j++] = str[i];
+        }
+        
+        i++;
+    }
+    
+    str[j] = '\0';
+}
+
+char* get_field(char *str, int *i){
+    static char field[INPUT_LENGTH];
+    int j = 0;
+    int in_quotes = 0;
+
+    while (str[*i] != '\0')
+    {
+        char current_char = str[*i];
+        (*i)++;
+
+        if (current_char == '"')
+        {
+            in_quotes = !in_quotes;
+            continue;
+        }
+        
+        if (current_char == ',' && !in_quotes)
+        {
+            break;
+        }
+        
+        field[j++] = current_char;
+    }
+    
+    field[j] = '\0';
+    return field;
+
 }
 
 int read_from_csv(contact contact_array[]) {
@@ -62,33 +133,38 @@ int read_from_csv(contact contact_array[]) {
             *new_line_pointer = '\0';
         }
 
-        char *field = strtok(buffer, ",");
+        int i_buf = 0;
         int x = 0;
 
-        while (field != NULL)
+        while (buffer[i_buf] != '\0')
         {
+            char *field = get_field(buffer, &i_buf);
+            remove_quotes(field);
+
+            if (x >= 4) break;
+
             if (x == 0)
             {
                 strncpy(contact_array[i].name, field, INPUT_LENGTH -1);
                 contact_array[i].name[INPUT_LENGTH -1] = '\0';
-            }else if (x == 1)
+            }
+            else if (x == 1)
             {
                 strncpy(contact_array[i].address, field, INPUT_LENGTH -1);
                 contact_array[i].address[INPUT_LENGTH -1] = '\0';
-            }else if (x == 2)
+            }
+            else if (x == 2)
             {
                 strncpy(contact_array[i].email, field, INPUT_LENGTH -1);
                 contact_array[i].email[INPUT_LENGTH -1] = '\0';
-            }else if (x == 3)
+            }
+            else if (x == 3)
             {
                 strncpy(contact_array[i].number, field, INPUT_LENGTH -1);
                 contact_array[i].number[INPUT_LENGTH -1] = '\0';
             }
             
             x++;
-
-            field = strtok(NULL, ",");
-            
         }
 
         i++;
@@ -112,6 +188,8 @@ int main(int argc, char *argv[]) {
 
     while (1)
     {
+        clear_screen();
+
         printf("\n--- Contact Book ---\n");
         printf("[A] Add Contact\n");
         printf("[L] List Contacts\n");
@@ -126,10 +204,12 @@ int main(int argc, char *argv[]) {
         if (choice == 'a')
         {
             add_new_entry();
+            wait_for_enter();
         }
         else if (choice == 'l')
         {
             list_contacts();
+            wait_for_enter();
         }
         else if (choice == 'h')
         {
@@ -138,6 +218,8 @@ int main(int argc, char *argv[]) {
             printf("L - List contacts\n");
             printf("H - Help\n");
             printf("Q - Quit\n\n");
+
+            wait_for_enter();
         }
         else if (choice == 'q')
         {
@@ -185,7 +267,12 @@ int add_new_entry() {
     email[strcspn(email, "\n")] = 0;
     number[strcspn(number, "\n")] = 0;
 
-    fprintf(fptr, "%s,%s,%s,%s\n", name, address, email, number);
+    sanitize_input(name);
+    sanitize_input(address);
+    sanitize_input(email);
+    sanitize_input(number);
+
+    fprintf(fptr, "\"%s\",\"%s\",\"%s\",\"%s\"\n", name, address, email, number);
     fclose(fptr);
 
     printf("\nSaved contact!\n\n");
